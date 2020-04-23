@@ -90,9 +90,10 @@ class BackupService:
         self.__base_dir = os.path.join('/', backup_name)
 
     def backup_paths(self, paths):
+        execution_time = datetime.now()
         with self._generate_backup_file(paths) as raw_file:
             raw_file_size = self._get_file_size(raw_file)
-            filename = '{}.tar.gz'.format(datetime.now().strftime(r'%Y-%m-%d-%H%M'))
+            filename = '{}.tar.gz'.format(execution_time.strftime(r'%Y-%m-%d-%H%M'))
 
             logging.info('Uploading backup: %s', self._get_dropbox_path(filename))
             self.__dropbox_client.upload_file(raw_file, self._get_dropbox_path(filename))
