@@ -7,12 +7,15 @@ import os.path
 import shutil
 import tarfile
 import time
+import tempfile
 
 from datetime import datetime
-from tempfile import TemporaryFile
+from tempfile import TemporaryDirectory, NamedTemporaryFile, TemporaryFile
 
 import dropbox
 from dropbox.files import (CommitInfo, UploadSessionCursor, WriteMode)
+
+from pretty_bad_protocol import gnupg
 
 class DropboxClient:
 
@@ -85,17 +88,22 @@ class DropboxClient:
 
 class BackupService:
 
-    def __init__(self, dropbox_client, backup_name):
+    def __init__(self, dropbox_client, backup_name, encryption_service=None):
         self.__dropbox_client = dropbox_client
         self.__base_dir = os.path.join('/', backup_name)
+        self.__encryption_service = encryption_service
 
     def backup_paths(self, paths):
         execution_time = datetime.now()
-        with self._generate_backup_file(paths) as raw_file:
-            filename = '{}.tar.gz'.format(execution_time.strftime(r'%Y-%m-%d-%H%M'))
+        backup_file = self._generate_backup_file(paths)
+        filename = '{}.tar.gz'.format(execution_time.strftime(r'%Y-%m-%d-%H%M'))
 
-            logging.info('Uploading backup: %s', self._get_dropbox_path(filename))
-            self.__dropbox_client.upload_file(raw_file, self._get_dropbox_path(filename))
+        if self.__encryption_service is not None:
+            backup_file = self.__encryption_service.encrypt(backup_file)
+            filename += '.enc'
+
+        logging.info('Uploading backup: %s', self._get_dropbox_path(filename))
+        self.__dropbox_client.upload_file(backup_file, self._get_dropbox_path(filename))
 
 
     def cleanup_old_backups(self, max_to_keep):
@@ -124,6 +132,32 @@ class BackupService:
         return os.path.join(self.__base_dir, filename)
 
 
+class GpgEncryptionService:
+
+    def __init__(self, destination, gpg_home=None, gpg_pubkeyring=None):
+        self.__gpg = gpg = gnupg.GPG(homedir=gpg_home, keyring=gpg_pubkeyring)
+        self.__dest = destination
+        self.__temp_dir = TemporaryDirectory()
+
+    def encrypt(self, fileobj_input):
+        logging.info('Encrypting file using GPG encryption to key: %s', self.__dest)
+        fileobj_input.seek(0)
+        encrypted_file = os.path.join(self.__temp_dir.name, 'encrypted-file')
+        try:
+            res = self.__gpg.encrypt(fileobj_input,
+                                        self.__dest,
+                                        output=encrypted_file,
+                                        armor=False)
+            if not res.ok:
+                raise Exception(res.status)
+        except Exception as e:
+            logging.error('Failed to encrypt backup file: {}'.format(e))
+            raise
+
+        fileobj_input.close()
+        return open(encrypted_file, 'rb')
+
+
 
 def main():
     parser = argparse.ArgumentParser(description='Backup data using Dropbox as storage.')
@@ -136,6 +170,12 @@ def main():
     parser.add_argument('--max-backups',
                         type=int,
                         help='Max number of these backups to keep in Dropbox')
+    parser.add_argument('--gpg-encrypt',
+                        help='Key fingerprint to use for encrypting')
+    parser.add_argument('--gpg-home',
+                        help='Folder to use as GPG home')
+    parser.add_argument('--gpg-pubkeyring',
+                        help='GPG public key keyring to use')
     parser.add_argument('paths',
                         nargs='+',
                         help='List of paths to include in the backup')
@@ -144,7 +184,14 @@ def main():
     start_time = time.perf_counter()
     logging.info('Creating Dropbox client')
     dropbox_client = DropboxClient(dropbox.Dropbox(args.api_key, timeout=None))
-    backup_service = BackupService(dropbox_client, args.backup_name)
+
+    encryption_service = None
+    if args.gpg_encrypt is not None:
+        encryption_service = GpgEncryptionService(args.gpg_encrypt,
+                                                  args.gpg_home,
+                                                  args.gpg_pubkeyring)
+
+    backup_service = BackupService(dropbox_client, args.backup_name, encryption_service)
     if args.max_backups is not None:
         logging.info('Performing cleanup of old backups')
         backup_service.cleanup_old_backups(args.max_backups - 1)
