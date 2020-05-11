@@ -3,7 +3,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="BackupToDropbox",
+    name="backup-to-dropbox",
     version="0.2.0",
     packages=find_packages(),
     scripts=["backup-to-dropbox.py"],
