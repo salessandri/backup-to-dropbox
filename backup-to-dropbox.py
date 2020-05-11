@@ -39,9 +39,10 @@ def main():
 
     encryption_service = None
     if args.gpg_encrypt is not None:
-        encryption_service = GpgEncryptionService(args.gpg_encrypt,
-                                                  args.gpg_home,
-                                                  args.gpg_pubkeyring)
+        from pretty_bad_protocol import gnupg
+
+        gnupg_api = gnupg.GPG(homedir=args.gpg_home, keyring=args.gpg_pubkeyring)
+        encryption_service = GpgEncryptionService(args.gpg_encrypt, gnupg_api)
 
     backup_service = BackupService(dropbox_client, args.backup_name, encryption_service)
     if args.max_backups is not None:

@@ -6,8 +6,6 @@ import tarfile
 from datetime import datetime
 from tempfile import TemporaryDirectory, NamedTemporaryFile, TemporaryFile
 
-from pretty_bad_protocol import gnupg
-
 
 
 class BackupService:
@@ -59,8 +57,8 @@ class BackupService:
 
 class GpgEncryptionService:
 
-    def __init__(self, destination, gpg_home=None, gpg_pubkeyring=None):
-        self.__gpg = gpg = gnupg.GPG(homedir=gpg_home, keyring=gpg_pubkeyring)
+    def __init__(self, destination, gpg_api):
+        self.__gpg = gpg_api
         self.__dest = destination
         self.__temp_dir = TemporaryDirectory()
 
@@ -70,9 +68,9 @@ class GpgEncryptionService:
         encrypted_file = os.path.join(self.__temp_dir.name, 'encrypted-file')
         try:
             res = self.__gpg.encrypt(fileobj_input,
-                                        self.__dest,
-                                        output=encrypted_file,
-                                        armor=False)
+                                     self.__dest,
+                                     output=encrypted_file,
+                                     armor=False)
             if not res.ok:
                 raise Exception(res.status)
         except Exception as e:
