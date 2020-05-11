@@ -1,6 +1,7 @@
 import io
 import logging
 
+from dropbox.exceptions import ApiError
 from dropbox.files import (CommitInfo, UploadSessionCursor, WriteMode)
 
 class DropboxClient:
@@ -54,7 +55,7 @@ class DropboxClient:
         try:
             return [entry.name for \
                     entry in self.__dropbox_client.files_list_folder(folder_path).entries]
-        except dropbox.exceptions.ApiError as e:
+        except ApiError as e:
             folder_list_error = e.error
             if not folder_list_error.is_path():
                 raise
