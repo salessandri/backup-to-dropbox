@@ -53,6 +53,6 @@ def main():
     logging.info('Backup finished. Time elapsed: %.2f', end_time - start_time)
 
 if __name__ == '__main__':
-    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG)
+    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
 
     main()
