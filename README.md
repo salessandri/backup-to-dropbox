@@ -2,18 +2,23 @@
 
 This is a small utility written in python3 that allows generating tar-gzipped backups and upload them to a [Dropbox](https://www.dropbox.com) account.
 
-## Requirements
+## Installing
 
-The only requirements for this tool are: python3 (>= 3.6) and dropbox (>= 10).
-The latter can be installed by running:
+Using pip:
 
 ```
-$ pip install -r requirements.txt
+$ pip install backup-to-dropbox
 ```
-or:
+
+Or manually running within the project's root folder:
+
 ```
-$ pip install dropbox
+$ python3 setup.py install
 ```
+
+## Dependencies
+
+The only requirements for this tool are: `python3` (>= 3.6) and `dropbox` (>= 10). Optionally, if you want to encrypt the backups using GPG the `pretty-bad-protocol` is needed too.
 
 ## Usage
 
@@ -25,7 +30,7 @@ All this can be done with a few clicks thorough Dropbox's web interface.
 
 **IMPORTANT NOTE:** I **strongly suggest** that you only give permissions to the app to access a single folder. This minimizes the risk of exposing the whole account in case the token gets stolen but also means that all the backups are going to be neatly stored and tucked away in a separate folder.
 
-### Generating a Backup
+### Generating a backup
 
 In order to generate a backup the application takes two required arguments: the backup's name and the list of paths to back up.
 
@@ -42,6 +47,25 @@ One of the features included is the ability to only keep a certain number of bac
 
 The application will delete the oldest files in the given backup name folder until the count is the argument passed minus one.
 This is done so as to leave space for the backup being currently generated.
+
+### Encrypting the backup
+
+Currently, it is supported to encrypt the generated backup using GPG targeting a particular key.
+In order to use this, the public key needs to be already located in a `gpg` compatible keyring in the host.
+
+The following arguments are used to enable the encryption:
+
+ - `--gpg-encrypt <KEY_FINGERPRINT>`: This enables the encryption and sets the key to use for encryption.
+ - `--gpg-home <GNUPG_HOME>` _(optional, default: platform dependent)_: If set, it uses the path given as the gnupg home folder.
+ - `--gpg-pubkeyring <PUBKEYRING_FILE>` _(optional, default: `pubring.gpg`)_: If set, it uses the file given as the public key-ring.
+
+When encrypting the backup the filename generated will have the `.enc` extension.
+
+To decipher the backup, in a host where the secret key is located run:
+
+```
+$ cat 2020-05-01-2300.tar.gz.enc | gpg --decrypt > 2020-05-01-2300.tar.gz
+```
 
 ### Example
 
