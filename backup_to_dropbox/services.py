@@ -16,7 +16,7 @@ class BackupService:
         self.__encryption_service = encryption_service
 
     def backup_paths(self, paths):
-        execution_time = datetime.now()
+        execution_time = BackupService.now()
         backup_file = self._generate_backup_file(paths)
         filename = '{}.tar.gz'.format(execution_time.strftime(r'%Y-%m-%d-%H%M'))
 
@@ -44,7 +44,7 @@ class BackupService:
     def _generate_backup_file(self, paths):
         raw_file = TemporaryFile()
         with tarfile.open(fileobj=raw_file, mode='w:gz') as targz_file:
-            for path in filter(lambda p: os.path.isfile(p) or os.path.isdir(p), paths):
+            for path in filter(lambda p: BackupService.isfile(p) or BackupService.isdir(p), paths):
                 logging.debug('Adding path "%s" to backup', path)
                 targz_file.add(path)
 
@@ -52,6 +52,18 @@ class BackupService:
 
     def _get_dropbox_path(self, filename):
         return os.path.join(self.__base_dir, filename)
+
+    @staticmethod
+    def now():
+        return datetime.now()
+
+    @staticmethod
+    def isfile(path):
+        return os.path.isfile(path)
+
+    @staticmethod
+    def isdir(path):
+        return os.path.isdir(path)
 
 
 
