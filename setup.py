@@ -12,7 +12,7 @@ setup(
     scripts=["backup-to-dropbox.py"],
 
     install_requires=[
-        "dropbox==10.1.1",
+        "dropbox==12.0.2",
         "pretty-bad-protocol==3.1.1",
     ],
 
