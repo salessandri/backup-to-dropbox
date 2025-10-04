@@ -4,21 +4,41 @@ This is a small utility written in python3 that allows generating tar-gzipped ba
 
 ## Installing
 
-Using pip:
+### Using uv (recommended)
 
+[uv](https://github.com/astral-sh/uv) is a fast Python package installer and resolver. To install the tool using uv:
+
+```bash
+$ uv pip install backup-to-dropbox
 ```
+
+Or to install from source:
+
+```bash
+$ git clone https://github.com/salessandri/backup-to-dropbox.git
+$ cd backup-to-dropbox
+$ uv pip install .
+```
+
+### Using pip
+
+```bash
 $ pip install backup-to-dropbox
-```
-
-Or manually running within the project's root folder:
-
-```
-$ python3 setup.py install
 ```
 
 ## Dependencies
 
 The only requirements for this tool are: `python3` (>= 3.6) and `dropbox` (>= 10). Optionally, if you want to encrypt the backups using GPG the `pretty-bad-protocol` is needed too.
+
+## Development
+
+This project uses `pyproject.toml` for package configuration and `uv` for dependency management. To set up a development environment:
+
+```bash
+$ uv venv
+$ source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+$ uv pip install -e .
+```
 
 ## Usage
 
