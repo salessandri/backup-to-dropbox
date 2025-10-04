@@ -1,0 +1,34 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "backup-to-dropbox"
+version = "0.2.0"
+description = "Tool to generate backups (tar.gz files) and upload them to Dropbox"
+readme = "README.md"
+requires-python = ">=3.6"
+license = {text = "MIT"}
+keywords = ["backup", "dropbox"]
+authors = [
+    {name = "Santiago Alessandri", email = "backup-to-dropbox@salessandri.name"}
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Topic :: System :: Archiving :: Backup",
+    "Topic :: Utilities",
+    "License :: OSI Approved :: MIT License",
+]
+dependencies = [
+    "dropbox==12.0.2",
+    "pretty-bad-protocol==3.1.1",
+]
+
+[project.urls]
+Homepage = "https://github.com/salessandri/backup-to-dropbox"
+
+[project.scripts]
+backup-to-dropbox = "backup_to_dropbox.main:main"
+
+[tool.uv]
+dev-dependencies = []

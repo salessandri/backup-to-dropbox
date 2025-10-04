@@ -10,7 +10,6 @@ from backup_to_dropbox.clients import DropboxClient
 from backup_to_dropbox.services import BackupService, GpgEncryptionService
 
 
-
 def main():
     parser = argparse.ArgumentParser(description='Backup data using Dropbox as storage.')
     parser.add_argument('--api-key',
