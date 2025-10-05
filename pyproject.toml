@@ -30,5 +30,5 @@ Homepage = "https://github.com/salessandri/backup-to-dropbox"
 [project.scripts]
 backup-to-dropbox = "backup_to_dropbox.main:main"
 
-[tool.uv]
-dev-dependencies = []
+[tool.hatchling]
+locations = {default = "src"}
